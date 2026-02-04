@@ -12,7 +12,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
 
-  const handleLogin = async (e: React.FormEvent, role: "admin" | "client") => {
+  const handleLogin = async (e: React.FormEvent, role: "admin" | "manager" | "client") => {
     e.preventDefault();
     setIsLoading(true);
     // Simulate network delay
@@ -88,8 +88,16 @@ export default function Login() {
           </Button>
           <Button 
             variant="outline" 
+            onClick={(e) => handleLogin(e, "manager")}
+            disabled={isLoading}
+          >
+            Team Demo
+          </Button>
+          <Button 
+            variant="outline" 
             onClick={(e) => handleLogin(e, "client")}
             disabled={isLoading}
+            className="col-span-2"
           >
             Client Demo
           </Button>

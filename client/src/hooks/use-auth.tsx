@@ -26,13 +26,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (email: string, role: "admin" | "manager" | "client") => {
+    let name = "Alex Admin";
+    let company = "AgencyFlow";
+    let avatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80";
+
+    if (role === "client") {
+      name = "Acme Corp Client";
+      company = "Acme Corp";
+    } else if (role === "manager") {
+      name = "Diana PM";
+      avatar = "https://i.pravatar.cc/150?u=8";
+    }
+
     const mockUser: User = {
       id: "1",
-      name: role === "client" ? "Acme Corp Client" : "Alex Admin",
+      name,
       email,
       role,
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-      company: role === "client" ? "Acme Corp" : "AgencyFlow"
+      avatar,
+      company
     };
     
     setUser(mockUser);
