@@ -1,0 +1,47 @@
+{
+  "sorted_middleware": [],
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/node_modules_6bba679b._.js",
+        "server/edge/chunks/[root-of-the-server]__f2b15f93._.js",
+        "server/edge/chunks/turbopack-node_modules_next_dist_esm_build_templates_edge-wrapper_b54128cf.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/admin/:path*{(\\\\.json)}?",
+          "originalSource": "/admin/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/portal/:path*{(\\\\.json)}?",
+          "originalSource": "/portal/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/team/:path*{(\\\\.json)}?",
+          "originalSource": "/team/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/login{(\\\\.json)}?",
+          "originalSource": "/login"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/register{(\\\\.json)}?",
+          "originalSource": "/register"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "development",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "dz3oFDttn1OafMkAoj0UgJlkLyHHetJU0barmFEUgyk=",
+        "__NEXT_PREVIEW_MODE_ID": "9f130001dc07172a5dc5e3fedcf889ce",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "cbb6e7b778e5800e41bbe47d948ffc956d9af05fe4c9085846a59608e5ad7bfc",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "c98dc8ee526a8e595911fca87f7c8ce17cfb674e7c099e64dc49b10cce13cb5f"
+      }
+    }
+  },
+  "instrumentation": null,
+  "functions": {}
+}
