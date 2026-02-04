@@ -12,6 +12,7 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import Contacts from "@/pages/crm/Contacts";
 import Board from "@/pages/projects/Board";
 import ClientDashboard from "@/pages/portal/ClientDashboard";
+import TeamInbox from "@/pages/team/Inbox";
 
 function Router() {
   return (
@@ -23,6 +24,8 @@ function Router() {
       <ProtectedRoute path="/admin" component={AdminDashboard} roles={["admin", "manager"]} />
       <ProtectedRoute path="/crm" component={Contacts} roles={["admin", "manager"]} />
       <ProtectedRoute path="/projects" component={Board} roles={["admin", "manager"]} />
+      <ProtectedRoute path="/inbox" component={TeamInbox} roles={["admin", "manager"]} />
+      <ProtectedRoute path="/tasks" component={TeamInbox} roles={["admin", "manager"]} />
       
       {/* Client Routes */}
       <ProtectedRoute path="/portal" component={ClientDashboard} roles={["client"]} />

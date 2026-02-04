@@ -50,6 +50,88 @@ export interface Invoice {
   status: "paid" | "pending" | "overdue";
 }
 
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  status: "online" | "busy" | "offline";
+  avatar: string;
+}
+
+export interface Message {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar: string;
+  content: string;
+  timestamp: string;
+  channel: string;
+  reactions?: { emoji: string; count: number }[];
+}
+
+export const mockTeamMembers: TeamMember[] = [
+  {
+    id: "1",
+    name: "Alice Admin",
+    role: "Admin",
+    status: "online",
+    avatar: "https://i.pravatar.cc/150?u=1"
+  },
+  {
+    id: "2",
+    name: "Bob Designer",
+    role: "Designer",
+    status: "busy",
+    avatar: "https://i.pravatar.cc/150?u=3"
+  },
+  {
+    id: "3",
+    name: "Charlie Dev",
+    role: "Developer",
+    status: "offline",
+    avatar: "https://i.pravatar.cc/150?u=4"
+  },
+  {
+    id: "4",
+    name: "Diana PM",
+    role: "Project Manager",
+    status: "online",
+    avatar: "https://i.pravatar.cc/150?u=8"
+  }
+];
+
+export const mockMessages: Message[] = [
+  {
+    id: "1",
+    senderId: "4",
+    senderName: "Diana PM",
+    senderAvatar: "https://i.pravatar.cc/150?u=8",
+    content: "Hey team, just a reminder that the Q1 Marketing Campaign review is at 2 PM today.",
+    timestamp: "10:30 AM",
+    channel: "general",
+    reactions: [{ emoji: "👍", count: 2 }]
+  },
+  {
+    id: "2",
+    senderId: "2",
+    senderName: "Bob Designer",
+    senderAvatar: "https://i.pravatar.cc/150?u=3",
+    content: "I've uploaded the new assets for the Website Redesign. Can someone take a look?",
+    timestamp: "11:15 AM",
+    channel: "design",
+    reactions: [{ emoji: "👀", count: 1 }]
+  },
+  {
+    id: "3",
+    senderId: "3",
+    senderName: "Charlie Dev",
+    senderAvatar: "https://i.pravatar.cc/150?u=4",
+    content: "On it! Will check them out after lunch.",
+    timestamp: "11:18 AM",
+    channel: "design"
+  }
+];
+
 export const mockClients: Client[] = [
   {
     id: "1",
