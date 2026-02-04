@@ -1,11 +1,20 @@
-import { createContext, useContext, ReactNode, useState, useEffect } from "react";
+import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { User } from "@/lib/mockData";
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "manager" | "client";
+  avatar: string | null;
+  company: string | null;
+  status: "online" | "busy" | "offline";
+};
 
 type AuthContextType = {
   user: User | null;
-  login: (email: string, role: "admin" | "manager" | "client") => void;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 };
 
@@ -16,51 +25,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [, setLocation] = useLocation();
 
-  useEffect(() => {
-    // Simulate session check
-    const storedUser = localStorage.getItem("agency_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+  const checkSession = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error("Session check failed:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
-  const login = (email: string, role: "admin" | "manager" | "client") => {
-    let name = "Alex Admin";
-    let company = "AgencyFlow";
-    let avatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80";
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
 
-    if (role === "client") {
-      name = "Acme Corp Client";
-      company = "Acme Corp";
-    } else if (role === "manager") {
-      name = "Diana PM";
-      avatar = "https://i.pravatar.cc/150?u=8";
-    }
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
 
-    const mockUser: User = {
-      id: "1",
-      name,
-      email,
-      role,
-      avatar,
-      company
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem("agency_user", JSON.stringify(mockUser));
-    
-    if (role === "client") {
-      setLocation("/portal");
-    } else {
-      setLocation("/admin");
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { success: false, error: data.message || "Login failed" };
+      }
+
+      setUser(data.user);
+      
+      if (data.user.role === "client") {
+        setLocation("/portal");
+      } else {
+        setLocation("/admin");
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: "Network error. Please try again." };
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("agency_user");
-    setLocation("/login");
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setUser(null);
+      setLocation("/login");
+    }
   };
 
   return (

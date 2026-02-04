@@ -5,26 +5,43 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useLocation } from "wouter";
 
 export default function Login() {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent, role: "admin" | "manager" | "client") => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    login(email || "demo@agencyflow.com", role);
+    setError("");
+    
+    const result = await login(email, password);
+    
+    if (!result.success) {
+      setError(result.error || "Login failed");
+    }
+    setIsLoading(false);
+  };
+
+  const handleDemoLogin = async (demoEmail: string) => {
+    setIsLoading(true);
+    setError("");
+    
+    const result = await login(demoEmail, "demo123");
+    
+    if (!result.success) {
+      setError(result.error || "Login failed");
+    }
     setIsLoading(false);
   };
 
   return (
     <AuthLayout>
       <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight font-heading">
+        <h1 className="text-2xl font-semibold tracking-tight font-heading" data-testid="text-login-title">
           Welcome back
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -32,8 +49,13 @@ export default function Login() {
         </p>
       </div>
       <div className="grid gap-6">
-        <form onSubmit={(e) => handleLogin(e, "admin")}>
+        <form onSubmit={handleLogin}>
           <div className="grid gap-4">
+            {error && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md" data-testid="text-error-message">
+                {error}
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -46,6 +68,7 @@ export default function Login() {
                 disabled={isLoading}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                data-testid="input-email"
               />
             </div>
             <div className="grid gap-2">
@@ -54,11 +77,12 @@ export default function Login() {
                 id="password"
                 type="password"
                 disabled={isLoading}
-                value="password" // Dummy
-                readOnly
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                data-testid="input-password"
               />
             </div>
-            <Button disabled={isLoading} className="w-full">
+            <Button disabled={isLoading} className="w-full" data-testid="button-submit">
               {isLoading && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
@@ -81,23 +105,26 @@ export default function Login() {
         <div className="grid grid-cols-2 gap-4">
           <Button 
             variant="outline" 
-            onClick={(e) => handleLogin(e, "admin")}
+            onClick={() => handleDemoLogin("admin@agencyflow.com")}
             disabled={isLoading}
+            data-testid="button-demo-admin"
           >
             Admin Demo
           </Button>
           <Button 
             variant="outline" 
-            onClick={(e) => handleLogin(e, "manager")}
+            onClick={() => handleDemoLogin("alex@agencyflow.com")}
             disabled={isLoading}
+            data-testid="button-demo-team"
           >
             Team Demo
           </Button>
           <Button 
             variant="outline" 
-            onClick={(e) => handleLogin(e, "client")}
+            onClick={() => handleDemoLogin("client@techstartup.com")}
             disabled={isLoading}
             className="col-span-2"
+            data-testid="button-demo-client"
           >
             Client Demo
           </Button>
