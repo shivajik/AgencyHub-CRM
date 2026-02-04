@@ -20,6 +20,7 @@ export const users = pgTable("users", {
   status: userStatusEnum("status").notNull().default("offline"),
   avatar: text("avatar"),
   company: text("company"),
+  clientId: varchar("client_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

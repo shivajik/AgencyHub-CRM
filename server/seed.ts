@@ -46,7 +46,7 @@ async function seed() {
 
     console.log("✅ Created demo users");
 
-    // Create demo clients
+    // Create demo clients (need to create before linking to client user)
     const client1 = await storage.createClient({
       name: "TechStartup Inc",
       contactPerson: "Michael Roberts",
@@ -84,6 +84,10 @@ async function seed() {
     });
 
     console.log("✅ Created demo clients");
+
+    // Link client user to TechStartup client
+    await storage.updateUser(clientUser.id, { clientId: client1.id } as any);
+    console.log("✅ Linked client user to TechStartup");
 
     // Create demo projects
     const project1 = await storage.createProject({

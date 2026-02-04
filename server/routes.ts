@@ -48,12 +48,28 @@ export async function registerRoutes(
     })
   );
 
-  // Auth middleware
-  const requireAuth = (req: Request, res: Response, next: Function) => {
+  // Auth middleware - adds user to request
+  const requireAuth = async (req: Request, res: Response, next: Function) => {
     if (!req.session.userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
+    const user = await storage.getUser(req.session.userId);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    (req as any).user = user;
     next();
+  };
+
+  // Role-based middleware
+  const requireRole = (...roles: string[]) => {
+    return (req: Request, res: Response, next: Function) => {
+      const user = (req as any).user;
+      if (!user || !roles.includes(user.role)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      next();
+    };
   };
 
   // ============= AUTH ROUTES =============
@@ -149,6 +165,16 @@ export async function registerRoutes(
 
   app.get("/api/clients", requireAuth, async (req, res) => {
     try {
+      const user = (req as any).user;
+      
+      if (user.role === "client") {
+        if (!user.clientId) {
+          return res.json({ clients: [] });
+        }
+        const client = await storage.getClient(user.clientId);
+        return res.json({ clients: client ? [client] : [] });
+      }
+      
       const clients = await storage.getAllClients();
       return res.json({ clients });
     } catch (error) {
@@ -158,7 +184,14 @@ export async function registerRoutes(
 
   app.get("/api/clients/:id", requireAuth, async (req, res) => {
     try {
-      const client = await storage.getClient(String(req.params.id));
+      const user = (req as any).user;
+      const clientId = String(req.params.id);
+      
+      if (user.role === "client" && user.clientId !== clientId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const client = await storage.getClient(clientId);
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
@@ -168,20 +201,17 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/clients", requireAuth, async (req, res) => {
+  app.post("/api/clients", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       const validatedData = insertClientSchema.parse(req.body);
       const client = await storage.createClient(validatedData);
       
-      // Create activity
-      const user = await storage.getUser(req.session.userId!);
-      if (user) {
-        await storage.createActivity({
-          userId: user.id,
-          action: "created a new client",
-          target: client.name,
-        });
-      }
+      const user = (req as any).user;
+      await storage.createActivity({
+        userId: user.id,
+        action: "created a new client",
+        target: client.name,
+      });
 
       return res.json({ client });
     } catch (error) {
@@ -192,7 +222,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/clients/:id", requireAuth, async (req, res) => {
+  app.patch("/api/clients/:id", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       await storage.updateClient(String(req.params.id), req.body);
       const client = await storage.getClient(String(req.params.id));
@@ -202,7 +232,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/clients/:id", requireAuth, async (req, res) => {
+  app.delete("/api/clients/:id", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       await storage.deleteClient(String(req.params.id));
       return res.json({ message: "Client deleted" });
@@ -215,6 +245,16 @@ export async function registerRoutes(
 
   app.get("/api/projects", requireAuth, async (req, res) => {
     try {
+      const user = (req as any).user;
+      
+      if (user.role === "client") {
+        if (!user.clientId) {
+          return res.json({ projects: [] });
+        }
+        const projects = await storage.getProjectsByClient(user.clientId);
+        return res.json({ projects });
+      }
+      
       const projects = await storage.getAllProjects();
       return res.json({ projects });
     } catch (error) {
@@ -224,10 +264,17 @@ export async function registerRoutes(
 
   app.get("/api/projects/:id", requireAuth, async (req, res) => {
     try {
+      const user = (req as any).user;
       const project = await storage.getProject(String(req.params.id));
+      
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
       }
+      
+      if (user.role === "client" && project.clientId !== user.clientId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
       return res.json({ project });
     } catch (error) {
       return res.status(500).json({ message: "Internal server error" });
@@ -333,6 +380,16 @@ export async function registerRoutes(
 
   app.get("/api/invoices", requireAuth, async (req, res) => {
     try {
+      const user = (req as any).user;
+      
+      if (user.role === "client") {
+        if (!user.clientId) {
+          return res.json({ invoices: [] });
+        }
+        const invoices = await storage.getInvoicesByClient(user.clientId);
+        return res.json({ invoices });
+      }
+      
       const invoices = await storage.getAllInvoices();
       return res.json({ invoices });
     } catch (error) {
@@ -340,7 +397,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/invoices", requireAuth, async (req, res) => {
+  app.post("/api/invoices", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       const validatedData = insertInvoiceSchema.parse(req.body);
       const invoice = await storage.createInvoice(validatedData);
@@ -353,7 +410,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/invoices/:id", requireAuth, async (req, res) => {
+  app.patch("/api/invoices/:id", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       await storage.updateInvoice(String(req.params.id), req.body);
       const invoice = await storage.getInvoice(String(req.params.id));
