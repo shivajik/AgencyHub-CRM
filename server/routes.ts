@@ -281,7 +281,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/projects", requireAuth, async (req, res) => {
+  app.post("/api/projects", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       const validatedData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(validatedData);
@@ -305,7 +305,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/projects/:id", requireAuth, async (req, res) => {
+  app.patch("/api/projects/:id", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       await storage.updateProject(String(req.params.id), req.body);
       const project = await storage.getProject(String(req.params.id));
@@ -315,7 +315,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/projects/:id", requireAuth, async (req, res) => {
+  app.delete("/api/projects/:id", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       await storage.deleteProject(String(req.params.id));
       return res.json({ message: "Project deleted" });
@@ -328,6 +328,20 @@ export async function registerRoutes(
 
   app.get("/api/tasks", requireAuth, async (req, res) => {
     try {
+      const user = (req as any).user;
+      
+      if (user.role === "client") {
+        if (!user.clientId) {
+          return res.json({ tasks: [] });
+        }
+        // Get projects for client, then tasks for those projects
+        const projects = await storage.getProjectsByClient(user.clientId);
+        const projectIds = projects.map(p => p.id);
+        const allTasks = await storage.getAllTasks();
+        const tasks = allTasks.filter(t => projectIds.includes(t.projectId));
+        return res.json({ tasks });
+      }
+      
       const tasks = await storage.getAllTasks();
       return res.json({ tasks });
     } catch (error) {
@@ -335,7 +349,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/tasks/my", requireAuth, async (req, res) => {
+  app.get("/api/tasks/my", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       const tasks = await storage.getTasksByAssignee(req.session.userId!);
       return res.json({ tasks });
@@ -344,7 +358,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/tasks", requireAuth, async (req, res) => {
+  app.post("/api/tasks", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       const validatedData = insertTaskSchema.parse(req.body);
       const task = await storage.createTask(validatedData);
@@ -357,7 +371,7 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/tasks/:id", requireAuth, async (req, res) => {
+  app.patch("/api/tasks/:id", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       await storage.updateTask(String(req.params.id), req.body);
       const task = await storage.getTask(String(req.params.id));
@@ -367,7 +381,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/tasks/:id", requireAuth, async (req, res) => {
+  app.delete("/api/tasks/:id", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       await storage.deleteTask(String(req.params.id));
       return res.json({ message: "Task deleted" });
@@ -422,7 +436,7 @@ export async function registerRoutes(
 
   // ============= MESSAGE ROUTES =============
 
-  app.get("/api/messages", requireAuth, async (req, res) => {
+  app.get("/api/messages", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       const channel = req.query.channel as string;
       const messages = channel 
@@ -434,7 +448,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/messages", requireAuth, async (req, res) => {
+  app.post("/api/messages", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       const validatedData = insertMessageSchema.parse({
         ...req.body,
@@ -452,7 +466,7 @@ export async function registerRoutes(
 
   // ============= ACTIVITY ROUTES =============
 
-  app.get("/api/activities", requireAuth, async (req, res) => {
+  app.get("/api/activities", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 10;
       const activities = await storage.getRecentActivities(limit);
@@ -464,7 +478,7 @@ export async function registerRoutes(
 
   // ============= USERS ROUTES =============
 
-  app.get("/api/users", requireAuth, async (req, res) => {
+  app.get("/api/users", requireAuth, requireRole("admin", "manager"), async (req, res) => {
     try {
       const users = await storage.getAllUsers();
       const sanitizedUsers = users.map(u => ({ ...u, password: undefined }));
