@@ -96,11 +96,38 @@ export default function LoginPage() {
             </Button>
           </form>
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-500 mb-2">Demo Credentials:</p>
-            <div className="space-y-1 text-xs text-gray-600">
-              <p><strong>Admin:</strong> admin@agencyflow.com / demo123</p>
-              <p><strong>Manager:</strong> alex@agencyflow.com / demo123</p>
-              <p><strong>Client:</strong> client@techstartup.com / demo123</p>
+            <p className="text-xs text-gray-500 mb-3">Quick Login:</p>
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start text-left"
+                onClick={() => { setEmail("admin@agencyflow.com"); setPassword("demo123"); }}
+                data-testid="quick-login-admin"
+              >
+                <span className="w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xs mr-2">A</span>
+                Admin - Sarah Johnson
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start text-left"
+                onClick={() => { setEmail("alex@agencyflow.com"); setPassword("demo123"); }}
+                data-testid="quick-login-manager"
+              >
+                <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs mr-2">M</span>
+                Manager - Alex Chen
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start text-left"
+                onClick={() => { setEmail("client@techstartup.com"); setPassword("demo123"); }}
+                data-testid="quick-login-client"
+              >
+                <span className="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs mr-2">C</span>
+                Client - Mike Wilson
+              </Button>
             </div>
           </div>
         </CardContent>
