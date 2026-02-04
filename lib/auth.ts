@@ -5,7 +5,10 @@ import { users } from "./schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET || "agencyflow-secret-key-change-in-production");
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function createToken(payload: { userId: string; role: string }) {
   const token = await new SignJWT(payload)

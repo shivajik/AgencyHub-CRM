@@ -10,7 +10,7 @@ export const users = pgTable("users", {
   role: text("role").notNull().default("client"),
   avatar: text("avatar"),
   status: text("status").default("offline"),
-  clientId: text("client_id"),
+  clientId: uuid("client_id").references(() => clients.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
