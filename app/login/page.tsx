@@ -113,10 +113,10 @@ export default function LoginPage() {
                 variant="outline"
                 className="w-full justify-start text-left"
                 onClick={() => { setEmail("alex@agencyflow.com"); setPassword("demo123"); }}
-                data-testid="quick-login-manager"
+                data-testid="quick-login-team"
               >
-                <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs mr-2">M</span>
-                Manager - Alex Chen
+                <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs mr-2">T</span>
+                Team Member - Alex Chen
               </Button>
               <Button
                 type="button"
